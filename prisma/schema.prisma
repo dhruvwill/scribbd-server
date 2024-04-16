@@ -1,0 +1,27 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Room {
+  id            String @id @default(auto()) @map("_id") @db.ObjectId
+  name          String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  totalRound    Int      // Total round
+  currentRound  Int      // Current round
+  users         User[]   // Array of Users with socketIDs, scores, and character
+  maxUsers      Int      // Max users
+  currentDrawer String?  // SocketID of the current drawer
+  words         String[] // String of generated words, last one is the current word
+  roomId        String  // Room ID
+}
+
+type User {
+  socketID  String
+  score     Int
+}

@@ -1,0 +1,21 @@
+{
+  "name": "scribbd-server",
+  "version": "0.0.1",
+  "description": "Backend For scribbd - scribbl.io clone",
+  "main": "index.js",
+  "scripts": {
+    "start": "node --watch index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^5.12.1",
+    "@socket.io/admin-ui": "^0.5.1",
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
+  },
+  "devDependencies": {
+    "prisma": "^5.12.1"
+  }
+}
