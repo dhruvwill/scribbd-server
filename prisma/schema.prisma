@@ -24,4 +24,17 @@ model Room {
 type User {
   socketID  String
   score     Int
+  character Character
+}
+
+type Character {
+    name      String
+    gender    Int
+    clothing  Int
+    eyebrow   Int
+    eyes      Int 
+    hair      Int
+    mouth     Int 
+    skintone  Int
+    accessory Int
 }
