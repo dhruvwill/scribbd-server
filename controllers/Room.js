@@ -98,8 +98,42 @@ async function leaveRoom(socket) {
   }
 }
 
-module.exports = { joinRandomRoom, leaveRoom };
+async function getRoomID(socket){ 
+  const room = await prisma.room.findFirst({
+    where: {
+      users: {
+        some: {
+          socketID: socket.id,
+        },
+      },
+    },
+  });
+  if (room) {
+    return room.roomId;
+  } else {
+    return null;
+  }
+}
+// async function getUserBySocketIdFromRoom(roomId, socketId) {
+//   const room = await prisma.room.findFirst({
+//     where: {
+//       roomId: roomId,
+//     },
+//     include: {
+//       users: true,
+//     },
+//   });
+//   if(room){
+//     return room.users.find((user) => user.socketID === socketId);
+//   }
+//   else{
+//     return null;
+//   }
+// }
+module.exports = { joinRandomRoom, leaveRoom,getRoomID};
 
+
+//chat event--
 // // Retrieve all rooms where this socketId is present in the users array
 // const roomsWithUser = await prisma.room.findMany({
 //   where: {

@@ -18,7 +18,7 @@ model Room {
   maxUsers      Int      // Max users
   currentDrawer String?  // SocketID of the current drawer
   words         String[] // String of generated words, last one is the current word
-  roomId        String  // Room ID
+  roomId        String @unique // Room ID
 }
 
 type User {

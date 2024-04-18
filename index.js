@@ -3,8 +3,7 @@ const { createServer } = require("node:http");
 const { Server } = require("socket.io");
 const { instrument } = require("@socket.io/admin-ui");
 const cors = require("cors");
-const { joinRandomRoom, leaveRoom } = require("./controllers/Room");
-const { SocketAddress } = require("node:net");
+const { joinRandomRoom, leaveRoom,getRoomID} = require("./controllers/Room");
 
 const app = express();
 const server = createServer(app);
@@ -25,10 +24,22 @@ io.on("connection", (socket) => {
 
   socket.on("join", async (userData) => {
     console.log("join: ", socket.id);
-    console.log(userData);
     const room = await joinRandomRoom(socket.id, userData);
     socket.join(room.roomId);
   });
+
+  socket.on("message",async(data)=>{
+    // console.log("message is:",messageData);
+    // socket.to(messageData.roomId).emit("message",messageData)
+    console.log("data received: ",data);
+    const roomId = await getRoomID(socket.id)
+    if(roomId){
+      console.log("Data emitted to : ", roomId);
+      socket.to(roomId).emit("message",data)
+    }else{
+      console.log("Room not found for socket ID:", socket.id);
+    }
+  })
 
   socket.on("leave", async () => {
     console.log("leave: ", socket.id);
@@ -41,9 +52,11 @@ io.on("connection", (socket) => {
   });
 });
 
-io.of("/").adapter.on("join-room", (room, id) => {
-  console.log(`socket ${io.sockets.sockets.get(id)} has joined room ${room}`);
-});
+// io.of("/").adapter.on("join-room", async (room, id) => {
+//   const user = await getUserBySocketIdFromRoom(room, id);
+//   console.log("user joine", user);
+//   io.to(room).emit("userJoined", user);
+// });
 
 server.listen(PORT, () => {
   console.log(`server running at http://localhost:${PORT}`);
