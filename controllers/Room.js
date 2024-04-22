@@ -98,7 +98,7 @@ async function leaveRoom(socket) {
   }
 }
 
-async function getRoomID(socket){ 
+async function getRoomID(socket) {
   const room = await prisma.room.findFirst({
     where: {
       users: {
@@ -114,6 +114,25 @@ async function getRoomID(socket){
     return null;
   }
 }
+
+// write a function to delete users which are not connnected to sockets, i.e. delete the socketid from users array in the database
+async function cleanUpDatabase(io) {
+  const rooms = await prisma.room.findMany();
+  rooms.forEach(async (room) => {
+    const updatedUsers = room.users.filter((user) =>
+      io.sockets.sockets.has(user.socketID)
+    );
+    await prisma.room.update({
+      where: {
+        id: room.id,
+      },
+      data: {
+        users: updatedUsers,
+      },
+    });
+  });
+}
+
 // async function getUserBySocketIdFromRoom(roomId, socketId) {
 //   const room = await prisma.room.findFirst({
 //     where: {
@@ -130,8 +149,7 @@ async function getRoomID(socket){
 //     return null;
 //   }
 // }
-module.exports = { joinRandomRoom, leaveRoom,getRoomID};
-
+module.exports = { joinRandomRoom, leaveRoom, getRoomID, cleanUpDatabase };
 
 //chat event--
 // // Retrieve all rooms where this socketId is present in the users array
