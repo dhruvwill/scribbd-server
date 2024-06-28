@@ -7,7 +7,10 @@ const {
   joinRandomRoom,
   leaveRoom,
   getRoomID,
+  getUserBySocketIdFromRoom,
   cleanUpDatabase,
+  getAllUsersByRoomID,
+  getRoomByID,
 } = require("./controllers/Room");
 
 const app = express();
@@ -32,6 +35,9 @@ io.on("connection", (socket) => {
     console.log("join: ", socket.id);
     const room = await joinRandomRoom(socket.id, userData);
     socket.join(room.roomId);
+
+    const rm = await getRoomByID(room.roomId);
+    io.to(rm.roomId).emit("usersUpdated", rm.users);
   });
 
   socket.on("message", async (data) => {
@@ -59,6 +65,11 @@ io.on("connection", (socket) => {
   socket.on("leave", async () => {
     console.log("leave: ", socket.id);
     const room = await leaveRoom(socket);
+    console.log(room);
+    if (room) {
+      const rm = await getRoomByID(room.roomId);
+      io.to(rm.roomId).emit("usersUpdated", rm.users);
+    }
   });
 
   socket.on("disconnect", async () => {
@@ -68,9 +79,15 @@ io.on("connection", (socket) => {
 });
 
 // io.of("/").adapter.on("join-room", async (room, id) => {
-//   const user = await getUserBySocketIdFromRoom(room, id);
-//   console.log("user joine", user);
-//   io.to(room).emit("userJoined", user);
+//   const users = await getAllUsersByRoomID(room);
+//   console.log("user updated", users);
+//   io.to(room).emit("userUpdated", users);
+// });
+
+// io.of("/").adapter.on("leave-room", async (room, id) => {
+//   const users = await getAllUsersByRoomID(room);
+//   console.log("user updated", users);
+//   io.to(room).emit("userUpdated", users);
 // });
 
 server.listen(PORT, () => {

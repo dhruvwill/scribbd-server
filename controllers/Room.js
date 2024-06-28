@@ -94,8 +94,18 @@ async function leaveRoom(socket) {
           id: room.id,
         },
       });
+    } else {
+      return room;
     }
   }
+}
+
+function getRoomByID(roomId) {
+  return prisma.room.findFirst({
+    where: {
+      roomId: roomId,
+    },
+  });
 }
 
 async function getRoomID(socket) {
@@ -133,23 +143,51 @@ async function cleanUpDatabase(io) {
   });
 }
 
-// async function getUserBySocketIdFromRoom(roomId, socketId) {
-//   const room = await prisma.room.findFirst({
-//     where: {
-//       roomId: roomId,
-//     },
-//     include: {
-//       users: true,
-//     },
-//   });
-//   if(room){
-//     return room.users.find((user) => user.socketID === socketId);
-//   }
-//   else{
-//     return null;
-//   }
-// }
-module.exports = { joinRandomRoom, leaveRoom, getRoomID, cleanUpDatabase };
+async function getUserBySocketIdFromRoom(roomId, socketId) {
+  const room = await prisma.room.findFirst({
+    where: {
+      roomId: roomId,
+    },
+    include: {
+      users: true,
+    },
+  });
+  if (room) {
+    return room.users.find((user) => user.socketID === socketId);
+  } else {
+    return null;
+  }
+}
+
+async function getAllUsersByRoomID(roomid) {
+  console.log("roomId", roomid);
+  // retrieve all users from the room
+  const room = await prisma.room.findFirst({
+    where: {
+      roomId: roomid,
+    },
+    include: {
+      users: true,
+    },
+  });
+  if (room) {
+    return room.users;
+  } else {
+    // Handle the case where no room with the provided roomId was found
+    console.error("No room found with roomId:", roomid);
+    return null;
+  }
+}
+
+module.exports = {
+  joinRandomRoom,
+  leaveRoom,
+  getRoomID,
+  cleanUpDatabase,
+  getUserBySocketIdFromRoom,
+  getAllUsersByRoomID,
+  getRoomByID,
+};
 
 //chat event--
 // // Retrieve all rooms where this socketId is present in the users array
